@@ -8,10 +8,10 @@
 ;------------------------------------------------------------
 ; Library of numeric-specific routines and macros.          |
 ; Contents:                                                 |
-;    1) RESETREG                                            |
-;    2) EXIT                                                |
-;    3) ISODD                                               |
-;    4) HALT                                                |
+;    1) BIN_DEC                                             |
+;    2) PRINT_HEX                                           |
+;    3) OCT_KEYB                                            |
+;    4) HEX_KEYB                                            |
 ;------------------------------------------------------------
 
 ; Library for numerical conversions.
@@ -19,6 +19,7 @@
 ; == BIN_DEC ==
 ; Prints number in AX as sequence of decimal digits.
 ; MODIFIES: FLAGS, AX, BX, CX, DX
+; REQUIRES: <iolib.asm>
 BIN_DEC macro       ; Print number in AX as decimal.
 LOCAL _PROC, _OUT
     mov cx,0        ; CX will be used as counter for decimal digits.
@@ -40,6 +41,7 @@ endm
 ; == PRINT_HEX ==
 ; Prints DL as a hex digit. Assume 00h <= DL <= 0Fh
 ; MODIFIES: FLAGS, DX.
+; REQUIRES: <iolib.asm>
 PRINT_HEX macro
 LOCAL _ADD10, _HEX_OUT
     cmp DL, 9       ; DL <= 9?
@@ -59,6 +61,7 @@ endm
 ; Routine is terminated immediately if user enters 'Q'.
 ; 
 ; MODIFIES: FLAGS, AX
+; REQUIRES: <iolib.asm>
 OCT_KEYB macro
 LOCAL _OIGNORE, _OQUIT
 _OIGNORE:
@@ -78,6 +81,7 @@ endm
 ; Requests a hex digit form keyboard and returns its binary value in AL.
 ; Routine is terminated if user enters 'Q'
 ; MODIFIES: FLAGS, AX
+; REQUIRES: <iolib.asm>
 HEX_KEYB macro
 LOCAL _HIGNORE, _HQUIT, _HFORW
 _HIGNORE:
