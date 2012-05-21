@@ -5,13 +5,13 @@
 ;   Orestis, b_gravedigger, Renelvon                        | 
 ;------------------------------------------------------------
 
-
 ;------------------------------------------------------------
 ; Library of generic macros.                                |
 ; Contents:                                                 |
 ;    1) RESETREG                                            |
 ;    2) EXIT                                                |
 ;    3) ISODD                                               |
+;    4) HALT                                                |
 ;------------------------------------------------------------
 
 
@@ -39,7 +39,8 @@ EXIT macro
 endm
 
 ; == ISODD ==
-; Takes a hex digit in al. Sets carry if it is odd.
+; Sets carry flag if AL is odd.
+; Clears carry flagg otherwise.
 ; Modifies: FLAGS.
 ISODD macro
 LOCAL _MYEXIT
@@ -50,4 +51,12 @@ LOCAL _MYEXIT
 	stc         ; no : Set carry.
 _MYEXIT:
 	pop AX      ; Restore AL (AX).
+endm
+
+; == HALT ==
+; Successfully halts, returning an exit code of 0x00
+; MODIFIES: N/A
+EXIT macro 
+    mov AX,0x4C00
+    int 21h
 endm
