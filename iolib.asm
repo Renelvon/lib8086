@@ -1,10 +1,8 @@
 ;------------------------------------------------------------
 ; ==> 8086 Library project <==                              |
-; Released under GNU GPLv3 or later.                        |
-; Credits to:                                               |
-;   Orestis, b_gravedigger, Renelvon                        | 
+; Released under GNU LGPLv3 or later.                       |
+; Copyright 2011-2012 Orestis, b_gravedigger, Renelvon      | 
 ;------------------------------------------------------------
-
 
 ;------------------------------------------------------------
 ; Library of I/O procedures and macros                      |
@@ -17,25 +15,26 @@
 
 ; == BACKSP ==
 ; Causes the cursor to delete last character.
-; Buggy.
+; MODIFIES: [none]
+; Untested.
 BACKSP macro
-	push AX
-	mov DL,08h
-	mov AH,022h
-	int 21h
-	mov DL,020h
-	mov AH,02h
-	int 21h
-	pop AX
+	push AX         ; Save AX on stack.
+    push DX         ; Save DX on stack. 
+	mov DL, 0x08    ; Place '\b' in DL.
+	mov AH, 0x02    ; Load DOS operation.
+	int 21h         ; Call DOS.
+    pop DX          ; Restore DX.
+	pop AX          ; Restore AX.
 endm
 
 ; == PRINT ==
 ; Prints char to screen.
+; MODIFIES: [none]
 PRINT macro CHAR
     push AX         ; Save AX on stack.
     push DX         ; Save DX on stack. 
-    mov DL, CHAR    ; Place char byte in DL
-    mov AH,2        ; Load DOS operation.
+    mov DL, CHAR    ; Place char byte in DL.
+    mov AH, 0x02    ; Load DOS operation.
     int 21h         ; Call DOS.
     pop DX          ; Restore DX.
     pop AX          ; Restore AX.
@@ -43,12 +42,13 @@ endm
 
 ; == PRINT_STR ==
 ; Prints '$'-terminated string to screen.
+; ASSUMES: String resides in segment pointed by DS.
 ; MODIFIES: [none]
 PRINT_STR macro STRING
     push AX         ; Save AX on stack.
-    push DX         ; Save DX on stack
-    lea DX, STRING  ; Load address of string @ DX
-    mov AH,9        ; Load DOS operation 
+    push DX         ; Save DX on stack.
+    lea DX,STRING   ; Load address of string @ DX.
+    mov AH, 0x09    ; Load DOS operation.
     int 21h         ; Call DOS.
     pop DX          ; Restore DX.
 	pop AX 			; Restore AX.
@@ -59,8 +59,8 @@ endm
 ; Character is returned in AL.
 ; MODIFIES: AX.
 READ macro 
-    mov AH,0x08
-    int 21h
+    mov AH, 0x08    ; Load DOS operation.
+    int 21h         ; Call DOS.
 endm
 
 ; == READ_ECHO ==
@@ -68,6 +68,6 @@ endm
 ; Character is returned in AL.
 ; MODIFIES: AX.
 READ_ECHO macro
-	mov AH,0x01
-	int 21h
+	mov AH, 0x01    ; Load DOS operation.
+	int 21h         ; Call DOS.
 endm
