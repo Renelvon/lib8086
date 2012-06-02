@@ -127,7 +127,7 @@ endm
 ; MODIFIES: FLAGS, AX
 ; REQUIRES: <iolib.asm>: PRINT, READ
 IN_HEX macro
-LOCAL _HIGNORE, _HQUIT, _HFORW
+LOCAL _HIGNORE, _HQUIT, _HFORW, _HFORW2
 _HIGNORE:
     READ            ; Read a char from keyboard.
     cmp AL, 'Q'     ; If user entered 'Q', terminate program.
@@ -135,17 +135,25 @@ _HIGNORE:
     cmp AL, '0'     ; chr(AL) < chr(0)?.
     jl _HIGNORE     ; yes: Ignore and request new char.
     cmp AL, '9'     ; chr(AL) > chr(9)?
-    jg _HFORW       ; Go to A-F handler.
+    jg _HFORW       ; Go to a-f/A-F handler.
     PRINT AL        ; Char is in 0-9 range. Print it to screen.
     sub AL, '0'     ; Get numeric value.
     jmp _HQUIT      ; Terminate routine.
 _HFORW:
+    cmp AL, 'a'     ; chr(AL) < chr(a)?
+    jl _HFORW2      ; yes: Go to A-F handler.
+    cmp AL, 'f'     ; chr(AL) > chr(f)?
+    jg _HIGNORE     ; yes: Ignore and request new char. (chr(F) < chr(f))
+	PRINT AL        ; Char is in a-f range. Print it to screen.
+	sub AL, 'a'     ; Get difference from 10.
+	add AL, 0x0a	; Properly adjust numeric value.
+_HFORW2:
     cmp AL, 'A'     ; chr(AL) < chr(A)?
     jl _HIGNORE     ; yes: Ignore and request new char.
     cmp AL, 'F'     ; chr(AL) > chr(F)?
     jg _HIGNORE     ; yes: Ignore and request new char.
     PRINT AL        ; Char is in A-F range. Print it to screen.
-    sub AL, 'A'     ; Get differnce from 10.
+    sub AL, 'A'     ; Get difference from 10.
 	add AL, 0x0a	; Properly adjust numeric value.
 _HQUIT:
 endm
