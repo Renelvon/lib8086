@@ -1,7 +1,7 @@
 ;------------------------------------------------------------
 ; ==> 8086 Library project <==                              |
 ; Released under GNU LGPLv3 or later.                       |
-; Copyright 2011-2012 Orestis, b_gravedigger, Renelvon      | 
+; Copyright 2011-2012 Orestis, Renelvon                     | 
 ;------------------------------------------------------------
 
 ;------------------------------------------------------------
@@ -10,7 +10,6 @@
 ;    1) RESETREG                                            |
 ;    2) EXIT                                                |
 ;    3) ISODD                                               |
-;    4) HALT                                                |
 ;------------------------------------------------------------
 
 
@@ -34,7 +33,7 @@ EXIT macro
     ; Service select: AH <- 0x4C
     ; Returned value: AL <- 0x00
     mov AX, 0x4C00
-    int 21H     ; Invoke DOS software interrupt.
+    int 0x21        ; Invoke DOS software interrupt.
 endm
 
 ; == ISODD ==
@@ -43,11 +42,11 @@ endm
 ; Modifies: FLAGS.
 ISODD macro
 LOCAL _MYEXIT
-	clc         ; Clear carry.
-	push AX     ; Save AL (AX).
-	and AL, 0x01 ; Is LSB of AL = 1?
-	jz _MYEXIT  ; yes: Leave carry cleared.
-	stc         ; no : Set carry.
+	clc             ; Clear carry.
+	push AX         ; Save AL (AX).
+	and AL, 0x01    ; Is LSB of AL = 1?
+	jz _MYEXIT      ; yes: Leave carry cleared.
+	stc             ; no : Set carry.
 _MYEXIT:
-	pop AX      ; Restore AL (AX).
+	pop AX          ; Restore AL (AX).
 endm
