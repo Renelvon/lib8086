@@ -16,11 +16,12 @@
 ;    7) READ_ECHO                                           |
 ;------------------------------------------------------------
 
-; Note: The 'unsafe' versions of the following macros
-; have the same functionality as their normal counterparts.
-; However, they forego any register saving/restoring. Thus,
-; they are intended for those occasions where best performance
-; or explicit stack control is required.
+; NOTE: Some of the following macros come in two versions,
+; one plain and one marked as 'UNSAFE'. Both versions perform
+; the same task.
+; However, the 'UNSAFE' macros forego any register saving/restoring.
+; They are, thus, primarily intended for those occasions where
+; best performance or explicit stack control is required.
 
 ; == BACKSP ==
 ; Causes the cursor to delete last character.
@@ -65,7 +66,7 @@ endm
 PRINT_STR macro STRING
     push AX         ; Save AX on stack.
     push DX         ; Save DX on stack.
-    lea DX,STRING   ; Load address of string @ DX.
+    lea DX, STRING  ; Load address of string @ DX.
     mov AH, 0x09    ; Load DOS operation.
     int 0x21        ; Call DOS.
     pop DX          ; Restore DX.
@@ -77,7 +78,7 @@ endm
 ; ASSUMES: String resides in segment pointed by DS.
 ; MODIFIES: AX, DX
 PRINT_STR_UNSAFE macro STRING
-    lea DX,STRING   ; Load address of string @ DX.
+    lea DX, STRING  ; Load address of string @ DX.
     mov AH, 0x09    ; Load DOS operation.
     int 0x21        ; Call DOS.
 endm

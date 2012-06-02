@@ -11,6 +11,7 @@
 ;    2) EXIT                                                |
 ;    3) IS_ODD                                              |
 ;    4) IS_HEX                                              |
+;    5) SAFE_CALL                                           |
 ;------------------------------------------------------------
 
 
@@ -76,3 +77,23 @@ _HEX:
 	stc             ; Set carry.
 _MYEXIT:
 endm              
+
+; == SAFE_CALL ==
+; Wraps a procedure call so that it doesn't affect
+; any important register (AX, BX, CX, DX, FLAGS).
+; MODIFIES: [none]
+SAFE_CALL macro THE_PROC
+    pushf           ; Save FLAGS register.
+    push AX         ; Save AX.
+    push BX         ; Save BX.
+    push CX         ; Save CX.
+    push DX         ; Save DX.
+
+    call THE_PROC   ; Call the targeted procedure.
+
+    pop  DX         ; Restore DX.
+    pop  CX         ; Restore CX.
+    pop  BX         ; Restore BX.
+    pop  AX         ; Restore AX.
+    popf            ; Restore FLAGS register.
+endm
