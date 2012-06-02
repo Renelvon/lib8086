@@ -9,7 +9,8 @@
 ; Contents:                                                 |
 ;    1) RESETREG                                            |
 ;    2) EXIT                                                |
-;    3) ISODD                                               |
+;    3) IS_ODD                                              |
+;    4) IS_HEX                                              |
 ;------------------------------------------------------------
 
 
@@ -36,11 +37,11 @@ EXIT macro
     int 0x21        ; Invoke DOS software interrupt.
 endm
 
-; == ISODD ==
+; == IS_ODD ==
 ; Sets carry flag if AL is odd.
 ; Clears carry flag otherwise.
-; Modifies: FLAGS.
-ISODD macro
+; MODIFIES: FLAGS.
+IS_ODD macro
 LOCAL _MYEXIT
 	clc             ; Clear carry.
 	push AX         ; Save AL (AX).
@@ -50,3 +51,28 @@ LOCAL _MYEXIT
 _MYEXIT:
 	pop AX          ; Restore AL (AX).
 endm
+
+; == IS_HEX ==
+; Sets carry flag if ASCII value of CHAR is a hexadecimal digit.
+; Clears carry flag otherwise.
+; ASSUMES: CHAR must be an 8-bit register.
+; MODIFIES: FLAGS.
+IS_HEX macro CHAR
+LOCAL _HEX, _MYEXIT
+	clc             ; Clear carry.
+	cmp CHAR, '0'   ; chr(CHAR) <  chr(0) ?
+	jb	_MYEXIT     ; yes: Not a hex digit.
+	cmp	CHAR, '9'   ; chr(CHAR) <= chr(9) ?
+	jbe	_HEX        ; yes: Hex digit.
+	cmp CHAR, 'A'   ; chr(CHAR) <  chr(A) ?
+	jb	_MYEXIT     ; yes: Not a hex digit.
+    cmp	CHAR, 'F'   ; chr(CHAR) <= chr(F) ?
+	jbe	_HEX        ; yes: Hex digit.
+	cmp	CHAR, 'a'   ; chr(CHAR) <  chr(a) ?
+	jb	_MYEXIT     ; yes: Not a hex digit.
+	cmp	CHAR, 'f'   ; chr(CHAR) >  chr(f) ?
+	jg	_MYEXIT     ; yes: Not a hex digit.
+_HEX:
+	stc             ; Set carry.
+_MYEXIT:
+endm              
