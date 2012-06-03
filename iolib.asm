@@ -28,8 +28,8 @@
 ; MODIFIES: [none]
 ; Untested.
 BACKSP macro
-	push AX         ; Save AX on stack.
-    push DX         ; Save DX on stack. 
+	push AX         ; Store AX.
+    push DX         ; Store DX.
 	mov DL, 0x08    ; Place '\b' in DL.
 	mov AH, 0x02    ; Load DOS operation.
 	int 0x21        ; Call DOS.
@@ -41,8 +41,8 @@ endm
 ; Prints char to screen.
 ; MODIFIES: [none]
 PRINT macro CHAR
-    push AX         ; Save AX on stack.
-    push DX         ; Save DX on stack. 
+	push AX         ; Store AX.
+    push DX         ; Store DX.
     mov DL, CHAR    ; Place char byte in DL.
     mov AH, 0x02    ; Load DOS operation.
     int 0x21        ; Call DOS.
@@ -64,8 +64,8 @@ endm
 ; ASSUMES: String resides in segment pointed by DS.
 ; MODIFIES: [none]
 PRINT_STR macro STRING
-    push AX         ; Save AX on stack.
-    push DX         ; Save DX on stack.
+	push AX         ; Store AX.
+    push DX         ; Store DX.
     lea DX, STRING  ; Load address of string @ DX.
     mov AH, 0x09    ; Load DOS operation.
     int 0x21        ; Call DOS.

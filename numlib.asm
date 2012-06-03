@@ -5,74 +5,109 @@
 ;------------------------------------------------------------
 
 ;------------------------------------------------------------
-; Library of numeric-specific routines and macros.          |
+; Library of routines for input, output and conversion      | 
+; of various kinds of numeric quantities.                   |
 ; Contents:                                                 |
-;    1) OUT_HEX                                             |
-;    2) OUT_BIN_ALL                                         |
-;    3) OUT_DEC_ALL                                         |
-;    4) OUT_HEX_ALL                                         |
-;    5) IN_OCT                                              |
-;    6) IN_DEC                                              |
-;    7) IN_HEX                                              |
+;    1) out_bin_word                                        |
+;    2) out_dec_word                                        |
+;    3) out_hex                                             |
+;    4) out_hex_byte                                        |
+;    5) out_hex_word                                        |
+;    6) in_oct                                              |
+;    7) in_dec                                              |
+;    8) in_hex                                              |
 ;------------------------------------------------------------
 
 ; Warning: Untested library.
 
-; == OUT_HEX ==
+; == out_bin_word ==
+; Prints number in AX as sequence of binary digits.
+; MODIFIES: FLAGS, AX, CX, DX
+; REQUIRES: <iolib.asm>: PRINT
+out_bin_word proc NEAR
+    mov CX, 16      ; Set up loop to print 16 bits.
+_BOUT:
+    mov DL, '0'     ; DL = chr(0). ('0' = 0x30, '1' = 0x31)
+    shl AX, 1       ; Shift MSB of AX into CF.
+    adc DL, 0       ; Add CF to DL to adjust the ASCII code 
+    PRINT DL        ; ... and print DL as char.
+    loop _BOUT      ; Loop until no binary digits left (CX = 0).
+    ret             ; Terminate routine.
+endp
+
+; == out_dec_word ==
+; Prints number in AX as sequence of decimal digits.
+; MODIFIES: FLAGS, AX, BX, CX, DX
+; REQUIRES: <iolib.asm>: PRINT_UNSAFE
+out_dec_word proc NEAR
+    mov CX, 0       ; CX will be used as counter for decimal digits.
+_DCALC:             ; Digit-calculation loop.
+    mov DX, 0       ; Zero DX.    
+    mov BX, 10      ; Divide DX:AX by 10 to find next decimal digit.
+    div BX          ; Quotient in AX, remainder in DX.
+    push DX         ; Store decimal digit.
+    inc CX          ; Increase digit counter. 
+    cmp AX, 0       ; Repeat until there are no more digits (AX = 0).
+    jnz _DCALC
+_DOUT:              ; Digit-printing loop (from MSD to LSD).
+    pop DX          ; Pop a decimal digit.
+    add DX, '0'     ; Generate ASCII code
+    PRINT_UNSAFE DL ; ... and print as char.
+    loop _DOUT      ; Loop until no decimal digits left (CX = 0).
+    ret             ; Terminate routine.
+endp
+
+; == out_hex ==
 ; Prints DL as a hex digit.
 ; ASSUMES: 0x00 <= DL <= 0x0f
 ; MODIFIES: FLAGS, DX.
 ; REQUIRES: <iolib.asm>: PRINT_UNSAFE
-OUT_HEX macro
-LOCAL _ADD10, _HEX_OUT
+out_hex proc NEAR
     cmp DL, 9       ; DL <= 9?
-    jle _ADD10      ; yes: jump to appropriate fixing code.
-    add DL, 0x37    ; no : Prepare DL by adding chr(A) - 10d = 37h 
+    jle _DEC        ; yes: jump to appropriate fixing code.
+    add DL, 0x37    ; no : Prepare DL by adding chr(A) - 10 = 0x37.
     jmp _HEX_OUT    ; ... and go to output stage.
-_ADD10:
-    add DL, 0x30    ; Prepare DL by adding chr(0) = 30h.
+_DEC:  
+    add DL, '0'     ; Prepare DL by adding chr(0) = 0x30.
 _HEX_OUT:
     PRINT_UNSAFE DL ; Print char to screen.
-endm
+    ret             ; Terminate routine.
+endp
 
-; == OUT_BIN_ALL ==
-; Prints number in AX as sequence of binary digits.
-; MODIFIES: FLAGS, AX, CX, DX
-; REQUIRES: <iolib.asm>: PRINT
-OUT_BIN_ALL macro
-LOCAL _PRINT, _OUT
-    mov CX, 16      ; Set up loop to print 16 bits.
-_PRINT:
-    shl AX, 1       ; MSB goes into carry.
-    mov DL, 0x00
-    adc DL, '0'     ; Add 0x30 to take the ASCII code ('0' = 30h, '1' = 31h)
-    PRINT DL        ; ... and print as char.
-    loop _PRINT     ; Loop until no binary digits left (CX = 0).
-endm
+; == out_hex_byte ==
+; Prints AL as 2 hex digits.
+; MODIFIES: AX, CX, DX
+; REQUIRES: <numlib.asm>: out_hex
+out_hex_byte proc NEAR
+    mov CH, AL      ; Save AL in CH.
+    mov CL, 4       ; Set rotation counter.
+    shr AL, CL      ; Swap high & low nibble of AL, to print MSH first.
+    and AL, 0x0f    ; Mask out high nibble (low nibble is single hex digit).
+    mov DL, AL      ; Copy AL to DL.
+    call out_hex    ; ... and print as hex.
+    mov AL, CH      ; Recover unswapped AL from CH.
+    and AL, 0x0f    ; Mask out high nibble (already printed).
+    mov DL, AL      ; Copy AL to DL.
+    call out_hex    ; ... and print as hex.
+    ret             ; Terminate routine.
+endp
 
-; == OUT_DEC_ALL ==
-; Prints number in AX as sequence of decimal digits.
-; MODIFIES: FLAGS, AX, BX, CX, DX
-; REQUIRES: <iolib.asm>: PRINT_UNSAFE
-OUT_DEC_ALL macro
-LOCAL _PROC, _OUT
-    mov CX, 0x00    ; CX will be used as counter for decimal digits.
-_PROC:
-    mov DX, 0x00        
-    mov BX, 10      ; Divide by 10 to find next decimal digit.
-    div BX          ; Quotient in AX, remainder in DX.
-    push DX         ; Store decimal digit.
-    inc CX          ; Increase digit counter. 
-    cmp AX, 0x00    ; Repeat until there are no more digits (AX=0).
-    jnz _PROC
-_OUT:
-    pop DX          ; Pop a decimal digit (from MSD to LSD).
-    add DX, '0'     ; Take the ASCII code
-    PRINT_UNSAFE DL ; ... and print as char.
-    loop _OUT       ; Loop until no decimal digits left (CX = 0).
-endm
+; == out_hex_word ==
+; Prints AX as 4 hex digits.
+; MODIFIES: AX, CX, BX, DX
+; REQUIRES: <numlib.asm>: out_hex_byte
+out_hex_word proc NEAR
+    mov BX, AX          ; Save AX in BX.
+    xchg AH, AL         ; Exchange AL with AH,
+                        ; Now AL contains the two most significant hex digits.
+    call out_hex_byte   ; Print AL as 2 hex digits.
+    mov AX, BX          ; Restore AX from BX.
+                        ; Now AL contains the two least significant hex digits.
+    call out_hex_byte   ; Print AL as 2 hex digits.
+    ret                 ; Terminate routine.
+endp
 
-; == IN_OCT ==
+; == in_oct ==
 ; Repeatedly requests a character from keyboard until user enters
 ; an octal digit. The octal digit is echoed on the screen.
 ; The value of the digit is returned in AL.
@@ -80,8 +115,7 @@ endm
 ; 
 ; MODIFIES: FLAGS, AX
 ; REQUIRES: <iolib.asm>: PRINT, READ
-IN_OCT macro
-LOCAL _OIGNORE, _OQUIT
+in_oct proc NEAR
 _OIGNORE:
     READ            ; Read a char from keyboard.
     cmp AL, 'Q'     ; If user entered 'Q', terminate program.
@@ -93,9 +127,10 @@ _OIGNORE:
     PRINT AL        ; Char is in 0-7 range. Print it to screen.
     sub AL, '0'     ; Get numeric value.
 _OQUIT:
-endm
+    ret             ; Terminate routine.
+endp
 
-; == IN_DEC ==
+; == in_dec ==
 ; Repeatedly requests a character from keyboard until user enters
 ; a decimal digit. The decimal digit is echoed on the screen.
 ; The value of the digit is returned in AL.
@@ -103,8 +138,7 @@ endm
 ; 
 ; MODIFIES: FLAGS, AX
 ; REQUIRES: <iolib.asm>: PRINT, READ
-IN_DEC macro
-LOCAL _DIGNORE, _DQUIT
+in_dec proc NEAR
 _DIGNORE:
     READ            ; Read a char from keyboard.
     cmp AL, 'Q'     ; If user entered 'Q', terminate program.
@@ -116,9 +150,10 @@ _DIGNORE:
     PRINT AL        ; Char is in 0-9 range. Print it to screen.
     sub AL, '0'     ; Get numeric value.
 _DQUIT:
-endm
+    ret             ; Terminate routine.
+endp
 
-; == IN_HEX ==
+; == in_hex ==
 ; Repeatedly requests a character from keyboard until user enters
 ; a hex digit. The hex digit is echoed on the screen.
 ; The value of the digit is returned in AL.
@@ -126,8 +161,7 @@ endm
 ;
 ; MODIFIES: FLAGS, AX
 ; REQUIRES: <iolib.asm>: PRINT, READ
-IN_HEX macro
-LOCAL _HIGNORE, _HQUIT, _HFORW, _HFORW2
+in_hex proc NEAR
 _HIGNORE:
     READ            ; Read a char from keyboard.
     cmp AL, 'Q'     ; If user entered 'Q', terminate program.
@@ -138,7 +172,7 @@ _HIGNORE:
     jg _HFORW       ; Go to a-f/A-F handler.
     PRINT AL        ; Char is in 0-9 range. Print it to screen.
     sub AL, '0'     ; Get numeric value.
-    jmp _HQUIT      ; Terminate routine.
+    ret             ; Terminate routine.
 _HFORW:
     cmp AL, 'a'     ; chr(AL) < chr(a)?
     jl _HFORW2      ; yes: Go to A-F handler.
@@ -147,6 +181,7 @@ _HFORW:
 	PRINT AL        ; Char is in a-f range. Print it to screen.
 	sub AL, 'a'     ; Get difference from 10.
 	add AL, 0x0a	; Properly adjust numeric value.
+    ret             ; Terminate routine.
 _HFORW2:
     cmp AL, 'A'     ; chr(AL) < chr(A)?
     jl _HIGNORE     ; yes: Ignore and request new char.
@@ -155,5 +190,5 @@ _HFORW2:
     PRINT AL        ; Char is in A-F range. Print it to screen.
     sub AL, 'A'     ; Get difference from 10.
 	add AL, 0x0a	; Properly adjust numeric value.
-_HQUIT:
-endm
+    ret             ; Terminate routine.
+endp

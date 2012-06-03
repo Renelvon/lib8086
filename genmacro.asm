@@ -14,18 +14,17 @@
 ;    5) SAFE_CALL                                           |
 ;------------------------------------------------------------
 
-
 ; == RESETREG ==
 ; Sets all registers of 8086 to 0.
 ; MODIFIES: AX, BX, CX, DX, DI, SI.
 RESETREG macro
-	  mov AX, 0x00
-	  mov BX, 0x00
-	  mov CX, 0x00
-	  mov DX, 0x00
+	  mov AX, 0
+	  mov BX, 0
+	  mov CX, 0
+	  mov DX, 0
 
-	  mov DI, 0x00
-	  mov SI, 0x00
+	  mov DI, 0
+	  mov SI, 0
 endm
 
 ; == EXIT ==
@@ -45,12 +44,10 @@ endm
 IS_ODD macro
 LOCAL _MYEXIT
 	clc             ; Clear carry.
-	push AX         ; Save AL (AX).
-	and AL, 0x01    ; Is LSB of AL = 1?
+	test AL, 0x01   ; Is LSB of AL = 1?
 	jz _MYEXIT      ; yes: Leave carry cleared.
 	stc             ; no : Set carry.
 _MYEXIT:
-	pop AX          ; Restore AL (AX).
 endm
 
 ; == IS_HEX ==
@@ -83,11 +80,11 @@ endm
 ; any important register (AX, BX, CX, DX, FLAGS).
 ; MODIFIES: [none]
 SAFE_CALL macro THE_PROC
-    pushf           ; Save FLAGS register.
-    push AX         ; Save AX.
-    push BX         ; Save BX.
-    push CX         ; Save CX.
-    push DX         ; Save DX.
+    pushf           ; Store FLAGS
+    push AX         ; Store AX.
+    push BX         ; Store BX.
+    push CX         ; Store CX.
+    push DX         ; Store DX.
 
     call THE_PROC   ; Call the targeted procedure.
 
@@ -95,5 +92,5 @@ SAFE_CALL macro THE_PROC
     pop  CX         ; Restore CX.
     pop  BX         ; Restore BX.
     pop  AX         ; Restore AX.
-    popf            ; Restore FLAGS register.
+    popf            ; Restore FLAGS
 endm
