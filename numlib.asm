@@ -178,9 +178,9 @@ _HFORW:
     jl _HFORW2      ; yes: Go to A-F handler.
     cmp AL, 'f'     ; chr(AL) > chr(f)?
     jg _HIGNORE     ; yes: Ignore and request new char. (chr(F) < chr(f))
-	PRINT AL        ; Char is in a-f range. Print it to screen.
-	sub AL, 'a'     ; Get difference from 10.
-	add AL, 0x0a	; Properly adjust numeric value.
+    PRINT AL        ; Char is in a-f range. Print it to screen.
+    sub AL, 'a'     ; Get difference from 10.
+    add AL, 0x0a	; Properly adjust numeric value.
     ret             ; Terminate routine.
 _HFORW2:
     cmp AL, 'A'     ; chr(AL) < chr(A)?
@@ -189,6 +189,6 @@ _HFORW2:
     jg _HIGNORE     ; yes: Ignore and request new char.
     PRINT AL        ; Char is in A-F range. Print it to screen.
     sub AL, 'A'     ; Get difference from 10.
-	add AL, 0x0a	; Properly adjust numeric value.
+    add AL, 0x0a	; Properly adjust numeric value.
     ret             ; Terminate routine.
 endp

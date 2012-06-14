@@ -28,20 +28,20 @@
 ; MODIFIES: [none]
 ; Untested.
 BACKSP macro
-	push AX         ; Store AX.
+    push AX         ; Store AX.
     push DX         ; Store DX.
-	mov DL, 0x08    ; Place '\b' in DL.
-	mov AH, 0x02    ; Load DOS operation.
-	int 0x21        ; Call DOS.
+    mov DL, 0x08    ; Place '\b' in DL.
+    mov AH, 0x02    ; Load DOS operation.
+    int 0x21        ; Call DOS.
     pop DX          ; Restore DX.
-	pop AX          ; Restore AX.
+    pop AX          ; Restore AX.
 endm
 
 ; == PRINT ==
 ; Prints char to screen.
 ; MODIFIES: [none]
 PRINT macro CHAR
-	push AX         ; Store AX.
+    push AX         ; Store AX.
     push DX         ; Store DX.
     mov DL, CHAR    ; Place char byte in DL.
     mov AH, 0x02    ; Load DOS operation.
@@ -64,13 +64,13 @@ endm
 ; ASSUMES: String resides in segment pointed by DS.
 ; MODIFIES: [none]
 PRINT_STR macro STRING
-	push AX         ; Store AX.
+    push AX         ; Store AX.
     push DX         ; Store DX.
     lea DX, STRING  ; Load address of string @ DX.
     mov AH, 0x09    ; Load DOS operation.
     int 0x21        ; Call DOS.
     pop DX          ; Restore DX.
-	pop AX 			; Restore AX.
+    pop AX 			; Restore AX.
 endm
 
 ; == PRINT_STR_UNSAFE ==
@@ -97,6 +97,6 @@ endm
 ; Character is returned in AL.
 ; MODIFIES: AX.
 READ_ECHO macro
-	mov AH, 0x01    ; Load DOS operation.
-	int 0x21        ; Call DOS.
+    mov AH, 0x01    ; Load DOS operation.
+    int 0x21        ; Call DOS.
 endm
