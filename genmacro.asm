@@ -57,19 +57,19 @@ endm
 ; MODIFIES: FLAGS.
 IS_HEX macro CHAR
 LOCAL _HEX, _MYEXIT
-	clc             ; Clear carry.
-	cmp CHAR, '0'   ; chr(CHAR) <  chr(0) ?
-	jb	_MYEXIT     ; yes: Not a hex digit.
-	cmp	CHAR, '9'   ; chr(CHAR) <= chr(9) ?
-	jbe	_HEX        ; yes: Hex digit.
-	cmp CHAR, 'A'   ; chr(CHAR) <  chr(A) ?
-	jb	_MYEXIT     ; yes: Not a hex digit.
-    cmp	CHAR, 'F'   ; chr(CHAR) <= chr(F) ?
-	jbe	_HEX        ; yes: Hex digit.
-	cmp	CHAR, 'a'   ; chr(CHAR) <  chr(a) ?
-	jb	_MYEXIT     ; yes: Not a hex digit.
-	cmp	CHAR, 'f'   ; chr(CHAR) >  chr(f) ?
-	jg	_MYEXIT     ; yes: Not a hex digit.
+    clc             ; Clear carry.
+    cmp CHAR, '0'   ; chr(CHAR) <  chr(0) ?
+    jb  _MYEXIT     ; yes: Not a hex digit.
+    cmp CHAR, '9'   ; chr(CHAR) <= chr(9) ?
+    jbe _HEX        ; yes: Hex digit.
+    cmp CHAR, 'A'   ; chr(CHAR) <  chr(A) ?
+    jb  _MYEXIT     ; yes: Not a hex digit.
+    cmp CHAR, 'F'   ; chr(CHAR) <= chr(F) ?
+    jbe _HEX        ; yes: Hex digit.
+    cmp CHAR, 'a'   ; chr(CHAR) <  chr(a) ?
+    jb  _MYEXIT     ; yes: Not a hex digit.
+    cmp CHAR, 'f'   ; chr(CHAR) >  chr(f) ?
+    jg  _MYEXIT     ; yes: Not a hex digit.
 _HEX:
 	stc             ; Set carry.
 _MYEXIT:
