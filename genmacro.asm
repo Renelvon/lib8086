@@ -18,13 +18,13 @@
 ; Sets all registers of 8086 to 0.
 ; MODIFIES: AX, BX, CX, DX, DI, SI.
 RESETREG macro
-	  mov AX, 0
-	  mov BX, 0
-	  mov CX, 0
-	  mov DX, 0
-
-	  mov DI, 0
-	  mov SI, 0
+    mov AX, 0
+    mov BX, 0
+    mov CX, 0
+    mov DX, 0
+    
+    mov DI, 0
+    mov SI, 0
 endm
 
 ; == EXIT ==
@@ -43,10 +43,10 @@ endm
 ; MODIFIES: FLAGS.
 IS_ODD macro
 LOCAL _MYEXIT
-	clc             ; Clear carry.
-	test AL, 0x01   ; Is LSB of AL = 1?
-	jz _MYEXIT      ; yes: Leave carry cleared.
-	stc             ; no : Set carry.
+    clc             ; Clear carry.
+    test AL, 0x01   ; Is LSB of AL = 1?
+    jz _MYEXIT      ; yes: Leave carry cleared.
+    stc             ; no : Set carry.
 _MYEXIT:
 endm
 
@@ -71,7 +71,7 @@ LOCAL _HEX, _MYEXIT
     cmp CHAR, 'f'   ; chr(CHAR) >  chr(f) ?
     jg  _MYEXIT     ; yes: Not a hex digit.
 _HEX:
-	stc             ; Set carry.
+    stc             ; Set carry.
 _MYEXIT:
 endm              
 
