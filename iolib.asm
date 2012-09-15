@@ -70,7 +70,7 @@ PRINT_STR macro STRING
     mov AH, 0x09    ; Load DOS operation.
     int 0x21        ; Call DOS.
     pop DX          ; Restore DX.
-    pop AX 			; Restore AX.
+    pop AX          ; Restore AX.
 endm
 
 ; == PRINT_STR_UNSAFE ==
